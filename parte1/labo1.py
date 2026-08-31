@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 
 #Ejercicio 1
 def esCuadrada(A):
-    if A.ndim != 2:
-        return False
     filas,columnas = A.shape
     if filas != columnas:
         return False
@@ -19,7 +17,7 @@ def triangSup(A):
     U = np.copy(A)
     for i in range(filas):
         for j in range(columnas):
-            if i>= j:
+            if i< j:
                 U[i][j] = 0
     return U
 
@@ -46,18 +44,18 @@ def diagonal(A):
 #Ejercicio 5
 def traza(A):
     suma = 0
-    filas = A.shape[0]
-    for i in range(filas):
+    filas,columnas= A.shape
+    for i in range(min(filas,columnas)):
         suma += A[i][i]
     return suma
 
 #Ejercicio 6
 def traspuesta(A):
-    T = np.copy(A)
     filas, columnas = A.shape
+    T = np.zeros((columnas,filas))
     for i in range(filas):
         for j in range(columnas):
-            T[i][j] = A[j][i]
+            T[j][i] = A[i][j]
     return T
 
 
@@ -83,26 +81,32 @@ def calcularAx(A,x):
 
 #Ejercicio 9
 def intercambiarFilas(A,i,j):
-    U = np.copy(A)
+    if max(i,j) >= A.shape[0]:
+        return # salimos
     columnas = A.shape[1]
     for k in range(columnas):
-        U[i][k], U[j][k] = U[j][k], U[i][k]
-    return U
+        aux = A[i,k]
+        A[i,k] = A[j,k]
+        A[j,k] = aux
+    return 
 
 #Ejercicio 10
-def sumar_fila_multiplo(A,i,j,s):
-    U = np.copy(A)
-    columnas = A.shape[1]
-    U[i] += U[j]*s
-    return U
+def sumar_fila_multiplo(A, i, j, s):
+    for k in range(A[i].shape[0]):
+        A[i,k] = A[i,k] + s * A[j,k]
+        
+    return
 
 #Ejercicio 11
 def esDiagonalmenteDominante(A):
+    if not esCuadrada(A):
+        return False
     fila, columna = A.shape
     for i in range(fila):
         suma = 0
         for j in range(columna):
-            suma += A[i][j]
+            if j != i:
+                suma += A[i][j]
         if abs(A[i][i]) < abs(suma):
             return False
 
@@ -111,13 +115,12 @@ def esDiagonalmenteDominante(A):
 #Ejercicio 12
 def matrizCirculante(v):
     largo = len(v)
-    filas = []
+    M = np.empty((largo,largo))
     for i in range(largo):
         rotada = v
         if i > 0:
             rotada = v[-i:] + v[:-i]
-        filas.append(rotada)
-    M = np.array(filas)
+        M[i] = rotada
     return M
 
 #Ejercicio 13
@@ -138,8 +141,19 @@ def matrizVandermonde(v):
 ## (Fk+2,Fk+1) = M(Fk+1,Fk)
 
 
-
 def numeroAureo(n):
+    M = np.array([[1,1],[1,0]])
+
+    phis = []
+    v = np.array([1,0]) # [F1,F0]
+    M_power = np.eye(2)
+    for i in range(1,n+1):
+        M_power = M_power @ M
+        phi = M_power[0,0]/M_power[0,1]
+        phis.append(phi)
+    return M_power[0,0]/M_power[0,1]
+
+def numeroAureo2(n):
     M = np.array([[1,1],[1,0]])
 
     phis = []
@@ -175,22 +189,21 @@ def multiplicarMatrices(A,B):
     return M
 
 #Ejercicio 15
+def fibonacci(n):
+    if n < 2:
+        return n
+    else:
+        return fibonacci(n-1)+fibonacci(n-2)
+    
 def matrizFibonacci(n):
-    M = np.zeros((n,n))
-    M[0][0],M[0][1] = 0, 1
-
+    res = np.zeros((n,n))
+    
     for i in range(n):
         for j in range(n):
-            if j < 2: 
-                if i > 0:
-                    if j == 0:
-                        M[i][j] = M[i-1][n-1]+M[i-1][n-2]
-                    if j == 1:
-                        M[i][j] = M[i][j-1]+M[i-1][n-1]
-            else:
-                M[i][j] = M[i][j-1] + M[i][j-2]
-
-    return M
+            fnro = i+j
+            res[i,j] = fibonacci(fnro)
+    
+    return res
 
 #Ejercicio 16
 def matrizHilbert(n):
